@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Chess</title>
+    <script type="text/javascript" src="../static/js/chessboard-0.3.0.js"></script>
+    <script
+    src="https://code.jquery.com/jquery-1.12.4.min.js"
+    integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+    crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../static/js/vue.js"></script>
+    <link rel="stylesheet" href="../static/css/chessboard-0.3.0.css">
+</head>
+<body>
+    <div id="chichess" class="board-b72b1" style="box-sizing: content-box; display: block; width: 558px">
+        <div v-for="r in ROW" style="display: block;">
+            <div v-for="c in COL" style="width: 62px; height: 62px; display: block; float: left; position: relative;"></div>
+            <div class="clearfix-7da63"></div>
+        </div>
+    </div>
+    
+    <div id="board" style="width: 500px"></div>
+    <script>
+        var board = ChessBoard('board', 'start');
+    </script>
+    <script type="text/javascript" src="../static/js/chichess.js"></script>
+</body>
+</html>

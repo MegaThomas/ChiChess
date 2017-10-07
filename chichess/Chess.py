@@ -8,7 +8,7 @@ import re
 
 class Chess(object):
     """Chess Board"""
-    bcolors = {
+    __colors = {
         "LBLUE": "\033[1;34m",
         "LGREEN": "\033[1;32m",
         "LCYAN": "\033[1;36m",
@@ -26,14 +26,17 @@ class Chess(object):
         "ENDC": "\033[0m"
     }
 
+    def __color(self, s, c):
+        return self.__colors[c] + s + self.__colors["ENDC"]
+
     hanzi = {
-        'R': bcolors["LRED"] + u'俥' + bcolors["ENDC"],
-        'H': bcolors["LRED"] + u'傌' + bcolors["ENDC"],
-        'E': bcolors["LRED"] + u'相' + bcolors["ENDC"],
-        'A': bcolors["LRED"] + u'仕' + bcolors["ENDC"],
-        'G': bcolors["LRED"] + u'帥' + bcolors["ENDC"],
-        'C': bcolors["LRED"] + u'炮' + bcolors["ENDC"],
-        'S': bcolors["LRED"] + u'兵' + bcolors["ENDC"],
+        'R': __colors["LRED"] + u'俥' + __colors["ENDC"],
+        'H': __colors["LRED"] + u'傌' + __colors["ENDC"],
+        'E': __colors["LRED"] + u'相' + __colors["ENDC"],
+        'A': __colors["LRED"] + u'仕' + __colors["ENDC"],
+        'G': __colors["LRED"] + u'帥' + __colors["ENDC"],
+        'C': __colors["LRED"] + u'炮' + __colors["ENDC"],
+        'S': __colors["LRED"] + u'兵' + __colors["ENDC"],
         'r': u'車',
         'h': u'馬',
         'e': u'象',
@@ -42,6 +45,8 @@ class Chess(object):
         'c': u'砲',
         's': u'卒',
     }
+
+    pattern = [u'┼─'] * 4 + [u'┴─'] + [u'┬─'] + [u'┼─'] * 4
 
     def __init__(self):
         super(Chess, self).__init__()
@@ -93,10 +98,10 @@ class Chess(object):
             self.board["grid"][pos[0]][pos[1]] = pid
 
     def display(self):
-        text = ["{:3}".format(str(10-idx))+''.join([self.hanzi[x[0]] if x != '0' else u'┼─' for x in row])
-                +' '+str(10-idx) for idx, row in enumerate(self.board["grid"][::-1])]
-        text[4] = '6  '+u'┴─'*9+' 6'
-        text[5] = '5  '+u'┬─'*9+' 5'
+        text = ["{:3}".format(str(10-idx)) + ''.join([self.hanzi[x[0]] if x != '0' else self.pattern[idx] for x in row])
+                + ' ' + str(10-idx) for idx, row in enumerate(self.board["grid"][::-1])]
+        # text[4] = '6  '+u'┴─'*9+' 6'
+        # text[5] = '5  '+u'┬─'*9+' 5'
         file_tag = "   a b c d e f g h i"
         text = [file_tag] + text + [file_tag]
         for row in text:
@@ -113,29 +118,38 @@ class Chess(object):
                 self.board["list"][eaten] = [-1, -1]
             return eaten
         else:
-            print("WTF: illegal move {}{} {}{}".format(x_old, y_old, x_new, y_new))
+            print(self.__color("WTF: ", "RED") + "illegal move {}{} {}{}".format(x_old, y_old, x_new, y_new))
 
-    def move(self, command):
-        m = re.match(self.cmd_reg, command)
-        x_old, y_old, x_new, y_new = m.group(1, 2, 3, 4)
-        x_old = ord(x_old) - ord('a')
-        x_new = ord(x_new) - ord('a')
-        y_old = int(y_old) - 1
-        y_new = int(y_new) - 1
+    def move(self, *args):
+        if len(args) == 1:
+            command = args[0]
+            m = re.match(self.cmd_reg, command)
+            x_old, y_old, x_new, y_new = m.group(1, 2, 3, 4)
+            x_old = ord(x_old) - ord('a')
+            x_new = ord(x_new) - ord('a')
+            y_old = int(y_old) - 1
+            y_new = int(y_new) - 1
+        elif len(args) == 4:
+            x_old, y_old, x_new, y_new = args
+        else:
+            print(self.__color("ERR: Variable length not match.", "RED"))
+            return
         eaten = self.__move(x_old, y_old, x_new, y_new)
-        self.eaten_list.append(eaten)
+        if eaten != '0' and eaten is not None:
+            self.eaten_list.append(eaten)
+            print(self.__color("EAT: ", "LBLUE") + self.hanzi[eaten[0]])
 
     def islegal(self, x_old, y_old, x_new, y_new):
         piece = self.board["grid"][y_old][x_old]
         if piece == '0':
-            print("ERR: move void")
+            print(self.__color("ERR: ", "YELLOW")+ "move void {}{} {}{}".format(x_old, y_old, x_new, y_new))
             return False
-        elif self.board["grid"][y_new][x_new][1] == piece[1]:
-            print("ERR: capture self piece")
+        elif str.isupper(self.board["grid"][y_new][x_new][0]) == str.isupper(piece[0]):
+            print(self.__color("ERR: ", "YELLOW") + "capture self piece {}{} {}{}".format(x_old, y_old, x_new, y_new))
             return False
         else:
             p = piece[0].lower()
-            side = piece[1]                                      # 0 for red, 1 for black
+            side = str.isupper(piece[1])                                      # 0 for red, 1 for black
             dx = abs(x_new - x_old)
             sx = self.__sign(x_new - x_old)
             dy = abs(y_new - y_old)
@@ -237,7 +251,7 @@ class Chess(object):
                     else:
                         return False
             else:
-                print("WTF: impossible")
+                print(self.__color("WTF: impossible", "RED"))
                 return False
 
     @staticmethod
@@ -247,10 +261,13 @@ class Chess(object):
 
 if __name__ == '__main__':
     chess = Chess()
-    chess.move("a1 a09")
+    chess.move("a4 a5")
+    chess.move("a5 b5")
+    chess.move("a5 a6")
+    chess.move("a6 b6")
     chess.move("a1b2")
     chess.move("a1 e1")
-    chess.move("a1 a3")
+    chess.move("a1 a7")
     chess.move("b1 b2")
     chess.move("b1 d2")
     chess.move("b1 c3")
