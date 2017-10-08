@@ -10,19 +10,23 @@
     crossorigin="anonymous"></script>
     <script type="text/javascript" src="../static/js/vue.js"></script>
     <link rel="stylesheet" href="../static/css/chessboard-0.3.0.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/chichess.css">
 </head>
 <body>
-    <div id="chichess" class="board-b72b1" style="box-sizing: content-box; display: block; width: 558px">
-        <div v-for="r in ROW" style="display: block;">
-            <div v-for="c in COL" style="width: 62px; height: 62px; display: block; float: left; position: relative;"></div>
-            <div class="clearfix-7da63"></div>
+    <div id="chichess" class="board-chi" style="width: 558px">
+        <div v-for="r in ROW" >
+            <div v-for="c in COL" class="square-chi" style="width: 62px; height: 62px;">
+                <span class="helper-chi"></span>
+                <img :src="pics[map[(90 - 10*r + c).toString()]]" v-if="map.hasOwnProperty((90 - 10*r + c).toString())" class="img-piece" style="width: 52px; height: 52px;">
+            </div>
+            <div class="clearfix-chi"></div>
         </div>
     </div>
-    
-    <div id="board" style="width: 500px"></div>
+
+    <!-- <div id="board" style="width: 500px"></div>
     <script>
         var board = ChessBoard('board', 'start');
-    </script>
+    </script> -->
     <script type="text/javascript" src="../static/js/chichess.js"></script>
 </body>
 </html>

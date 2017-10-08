@@ -4,7 +4,7 @@ from __future__ import print_function
 import itertools
 import string
 import re
-
+import json
 
 class Chess(object):
     """Chess Board"""

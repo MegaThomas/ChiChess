@@ -1,0 +1,37 @@
+.board-chi {
+  background: url("../img/board.svg"), #f0d9b5;
+  background-size: 100% 100%;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.clearfix-chi {
+  clear: both;
+}
+
+.square-chi {
+    display: block;
+    float: left;
+    position: relative;
+/* disable any native browser highlighting */
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+.square-chi:hover {
+    border-radius: 50%;
+    background: rgba(181, 136, 99, 0.3);
+    box-shadow: 0 0 10px 5px rgba(181, 136, 99, 0.3);
+}
+
+.helper-chi {
+    display: inline-block; height: 100%; vertical-align: middle;
+}
+
+.img-piece {
+    vertical-align: middle;
+}
