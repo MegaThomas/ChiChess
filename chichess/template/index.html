@@ -3,27 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello Chess</title>
-    <script type="text/javascript" src="../static/js/chessboard-0.3.0.js"></script>
-    <script
+    <script type="text/javascript" src="../static/js/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/chichess.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <!-- <script type="text/javascript" src="../static/js/chessboard-0.3.0.js"></script> -->
+    <!-- <script
     src="https://code.jquery.com/jquery-1.12.4.min.js"
     integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-    crossorigin="anonymous"></script>
-    <script type="text/javascript" src="../static/js/vue.js"></script>
-    <link rel="stylesheet" href="../static/css/chessboard-0.3.0.css">
-    <link rel="stylesheet" type="text/css" href="../static/css/chichess.css">
+    crossorigin="anonymous"></script> -->
+    <!-- <link rel="stylesheet" href="../static/css/chessboard-0.3.0.css"> -->
 </head>
 <body>
-    <div id="chichess" class="board-chi" style="width: 558px">
-        <div v-for="r in ROW" >
-            <div v-for="c in COL" class="square-chi" style="width: 62px; height: 62px;">
-                <span class="helper-chi"></span>
-                <img :src="pics[map[(90 - 10*r + c).toString()]]" v-if="map.hasOwnProperty((90 - 10*r + c).toString())" class="img-piece" style="width: 52px; height: 52px;">
+    <h1 class="text-center">中国象棋</h1>
+
+    <div id="chichess" class="container">
+        <div class="row">
+            <div class="col">
+                    <div id="chichess-board" class="board-chi" style="width: 441px">
+                        <div v-for="r in ROW" >
+                            <div
+                            v-for="c in COL"
+                            class="square-chi"
+                            style="width: 49px; height: 49px;"
+                            :id="'sq-'+(9-r).toString()+c.toString()"
+                            v-on:click="onClickPiece($event)">
+                                <span class="helper-chi"></span>
+                                <img 
+                                v-if="map.hasOwnProperty((90 - 10*r + c).toString())"
+                                :src="pics[map[(90 - 10*r + c).toString()]]"
+                                class="img-piece"
+                                style="width: 40px; height: 40px;">
+                            </div>
+                            <div class="clearfix-chi"></div>
+                        </div>
+                    </div>
             </div>
-            <div class="clearfix-chi"></div>
+            <div class="col">
+                <button 
+                type="button"
+                class="btn btn-outline-primary"
+                v-on:click="onClickRestart">重新开始</button>
+            </div>
         </div>
+        <div class="form-group">
+            &nbsp;
+        </div>
+        <div v-text="status" class="alert alert-info" role="alert"> </div>
     </div>
 
-    <!-- <div id="board" style="width: 500px"></div>
+    <!-- <div id="board" style="width: 400px"></div>
     <script>
         var board = ChessBoard('board', 'start');
     </script> -->

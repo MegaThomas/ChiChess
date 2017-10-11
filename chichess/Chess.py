@@ -4,7 +4,8 @@ from __future__ import print_function
 import itertools
 import string
 import re
-import json
+import copy
+
 
 class Chess(object):
     """Chess Board"""
@@ -46,20 +47,7 @@ class Chess(object):
         's': u'卒',
     }
 
-    pattern = [u'┼─'] * 4 + [u'┴─'] + [u'┬─'] + [u'┼─'] * 4
-
-    def __init__(self):
-        super(Chess, self).__init__()
-        self.board = {
-            "list": {},
-            "grid": []
-        }
-        self.cmd_reg = re.compile(r"^\s*([a-i])\s*(0?(?:[1-9]|10))\s*([a-i])\s*(0?(?:[1-9]|10))\s*$")
-        self.init_board()
-        self.eaten_list = []
-
-    def init_board(self):
-        self.board["list"] = {
+    initial = {
             'R0': [0, 0],
             'H0': [0, 1],
             'E0': [0, 2],
@@ -92,10 +80,35 @@ class Chess(object):
             's2': [6, 4],
             's3': [6, 6],
             's4': [6, 8],
+    }
+
+    pattern = [u'┼─'] * 4 + [u'┴─'] + [u'┬─'] + [u'┼─'] * 4
+
+    def __init__(self):
+        super(Chess, self).__init__()
+        self.board = {
+            "list": {},
+            "grid": []
         }
+        self.cmd_reg = re.compile(r"^\s*([a-i])\s*(0?(?:[1-9]|10))\s*([a-i])\s*(0?(?:[1-9]|10))\s*$")
+        self.init_board()
+        self.eaten_list = []
+
+    def init_board(self):
+        print(self.__color("WTF: ", "RED"), "INITING...")
+        self.board["list"] = copy.deepcopy(self.initial)
         self.board["grid"] = [['0'] * 9 for i in range(10)]
         for pid, pos in self.board["list"].items():
             self.board["grid"][pos[0]][pos[1]] = pid
+
+    def restart(self):
+        # print(self.__color("WTF: ", "RED"), "RESTARTING...")
+        self.board["list"] = copy.deepcopy(self.initial)
+        self.board["grid"] = [['0'] * 9 for i in range(10)]
+        for pid, pos in self.board["list"].items():
+            self.board["grid"][pos[0]][pos[1]] = pid
+        self.eaten_list = []
+        # print(self.__color("WTF: ", "RED"), "RESTART COMPLETE")
 
     def display(self):
         text = ["{:3}".format(str(10-idx)) + ''.join([self.hanzi[x[0]] if x != '0' else self.pattern[idx] for x in row])
@@ -138,18 +151,20 @@ class Chess(object):
         if eaten != '0' and eaten is not None:
             self.eaten_list.append(eaten)
             print(self.__color("EAT: ", "LBLUE") + self.hanzi[eaten[0]])
+        return eaten
 
     def islegal(self, x_old, y_old, x_new, y_new):
         piece = self.board["grid"][y_old][x_old]
+        target = self.board["grid"][y_new][x_new]
         if piece == '0':
             print(self.__color("ERR: ", "YELLOW")+ "move void {}{} {}{}".format(x_old, y_old, x_new, y_new))
             return False
-        elif str.isupper(self.board["grid"][y_new][x_new][0]) == str.isupper(piece[0]):
+        elif target[0] != '0' and str.isupper(target[0]) == str.isupper(piece[0]):
             print(self.__color("ERR: ", "YELLOW") + "capture self piece {}{} {}{}".format(x_old, y_old, x_new, y_new))
             return False
         else:
             p = piece[0].lower()
-            side = str.isupper(piece[1])                                      # 0 for red, 1 for black
+            side = str.islower(piece[0])                                      # 0 for red, 1 for black
             dx = abs(x_new - x_old)
             sx = self.__sign(x_new - x_old)
             dy = abs(y_new - y_old)
@@ -182,7 +197,7 @@ class Chess(object):
                     return False
             elif p == 'e':
                 if dx == 2 and dy == 2:
-                    if self.board["grid"][y_old+sx][x_old+sx] == '0':  # blocking the elephant's eye
+                    if self.board["grid"][y_old+sy][x_old+sx] == '0':  # blocking the elephant's eye
                         return True
                     else:
                         return False
@@ -217,59 +232,75 @@ class Chess(object):
                 else:
                     return False
             elif p == 'c':
-                if dx == 0 and dy != 0:
-                    if sum(x != '0' for x in [row[x_old] for row in self.board["grid"][y_old+sy:y_new:sy]]) <= 1:
-                        return True
-                    else:
-                        return False
-                elif dy == 0 and dx != 0:
-                    if sum(x == '0' for x in self.board["grid"][y_old][x_old+sx:x_new:sx]) <= 1:
-                        return True
+                if target[0] == '0':
+                    if dx == 0 and dy != 0:
+                        if all(x == '0' for x in [row[x_old] for row in self.board["grid"][y_old+sy:y_new:sy]]):
+                            return True
+                        else:
+                            return False
+                    elif dy == 0 and dx != 0:
+                        if all(x == '0' for x in self.board["grid"][y_old][x_old+sx:x_new:sx]):
+                            return True
+                        else:
+                            return False
                     else:
                         return False
                 else:
-                    return False
+                    if dx == 0 and dy != 0:
+                        if sum(x != '0' for x in [row[x_old] for row in self.board["grid"][y_old+sy:y_new:sy]]) == 1:
+                            return True
+                        else:
+                            return False
+                    elif dy == 0 and dx != 0:
+                        if sum(x != '0' for x in self.board["grid"][y_old][x_old+sx:x_new:sx]) == 1:
+                            return True
+                        else:
+                            return False
+                    else:
+                        return False
             elif p == 's':
-                if side:
-                    if sy == -1 and dx+dy == 1:
-                        if y_old <= 4:
-                            return True
-                        elif dx == 0:
+                if dx+dy == 1:
+                    if side:
+                        if (y_old >= 5 and sy == -1) or (y_old <= 4 and sy != 1):
                             return True
                         else:
                             return False
                     else:
-                        return False
+                        if (y_old <= 4 and sy == 1) or (y_old >= 5 and sy != -1):
+                            return True
+                        else:
+                            return False
                 else:
-                    if sy == 1 and dx+dy == 1:
-                        if y_old >= 5:
-                            return True
-                        elif dx == 0:
-                            return True
-                        else:
-                            return False
-                    else:
-                        return False
-            else:
-                print(self.__color("WTF: impossible", "RED"))
-                return False
+                    print(self.__color("WTF: impossible", "RED"))
+                    return False
 
     @staticmethod
     def __sign(x):
-        return (1, -1)[x < 0]
+        return x and (1, -1)[x < 0]
 
 
 if __name__ == '__main__':
     chess = Chess()
     chess.move("a4 a5")
+    chess.move("a5 a4")
     chess.move("a5 b5")
     chess.move("a5 a6")
     chess.move("a6 b6")
     chess.move("a1b2")
     chess.move("a1 e1")
     chess.move("a1 a7")
+    chess.move("a1 a3")
     chess.move("b1 b2")
     chess.move("b1 d2")
     chess.move("b1 c3")
     chess.move("c3 b5")
+    chess.move("i10 i8")
     chess.display()
+    chess.restart()
+    chess.move("i7 i6")
+    chess.move("i6 i7")
+    chess.move("i6 h6")
+    chess.move("i6 i5")
+    chess.move("i5 h5")
+    chess.display()
+

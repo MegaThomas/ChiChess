@@ -28,6 +28,12 @@
     box-shadow: 0 0 10px 5px rgba(181, 136, 99, 0.3);
 }
 
+.square-chi.selected-chi {
+    border-radius: 50%;
+    background: rgba(212, 235, 242, 0.7);
+    box-shadow: 0 0 10px 5px rgba(212, 235, 242, 0.7);
+}
+
 .helper-chi {
     display: inline-block; height: 100%; vertical-align: middle;
 }

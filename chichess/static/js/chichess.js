@@ -56,7 +56,7 @@ var chichess = new Vue({
       "E0": "../static/img/chesspieces/e0.svg",
       "s1": "../static/img/chesspieces/s1.svg",
     },
-    message: "Hello Chess",
+    status: "Hello Chess!",
     ROW: [0,1,2,3,4,5,6,7,8,9],
     COL: [0,1,2,3,4,5,6,7,8],
     pos: {
@@ -68,7 +68,9 @@ var chichess = new Vue({
       "s3": [6, 6], "s2": [6, 4], "H0": [2, 2], "H1": [0, 7], 
       "s4": [6, 8], "A1": [0, 5], "A0": [0, 3], "C1": [2, 7], 
       "C0": [2, 1], "E1": [0, 6], "E0": [0, 2], "s1": [6, 2]
-    }
+    },
+    selectPiece: null,
+    selectStep: false
   },
   computed: {
     map: function () {
@@ -77,6 +79,63 @@ var chichess = new Vue({
         temp[(this.pos[p][0]*10 + this.pos[p][1]).toString()] = p
       }
       return temp
+    }
+  },
+  methods: {
+    onClickPiece: function (e) {
+      if (this.selectStep) {
+        this.selectStep = false;
+        var vm = this;
+        axios.get(
+          '/move?o=' + this.selectPiece + 
+          '&n=' + e.currentTarget.id.slice(-2))
+        .then(function (response) {
+          console.log(response);
+          if (response.data == "illegal") {
+            vm.status = "Illegal Move";
+          } else {
+            vm.pos = response.data;
+            vm.status = "";
+          }
+          document.getElementById('sq-' + vm.selectPiece).classList.remove("selected-chi");
+          e.currentTarget.classList.remove("selected-chi");
+        })
+        .catch(function (error) {
+          console.log(error);
+          document.getElementById('sq-' + vm.selectPiece).classList.remove("selected-chi");
+          e.currentTarget.classList.remove("selected-chi");
+        })
+      } else {
+        if (e.currentTarget.childElementCount == 2) {
+          this.selectStep = true;
+          this.selectPiece = e.currentTarget.id.slice(-2);
+          e.currentTarget.className += " selected-chi";
+        }
+      }
+      
+      // var vm = this;
+      // console.log(e.currentTarget.parentElement.id);
+      // e.currentTarget.parentElement.className += " selected-chi";
+      // axios.get('/current/' + e.currentTarget.parentElement.id)
+      //   .then(function (response) {
+      //     // console.log(response);
+      //     vm.status = response.data;
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   })
+    },
+    onClickRestart: function () {
+      var vm = this;
+      axios.get('/restart')
+        .then(function (response) {
+          console.log(response);
+          vm.pos = response.data;
+          vm.status = "";
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
     }
   }
 })
