@@ -3,10 +3,12 @@
 
 import tornado.ioloop
 import tornado.web
+import tornado.websocket
 import signal
 import logging
 import os
 import json
+import re
 from Chess import Chess
 from tornado.options import options
 
@@ -42,22 +44,27 @@ class RestartHandler(tornado.web.RequestHandler):
         chess.restart()
         self.write(json.dumps(chess.board["list"]))
 
-class MoveHandler(tornado.web.RequestHandler):
-    def get(self):
-        print "Moving..."
-        global chess
-        old = self.get_argument('o')
-        new = self.get_argument('n')
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    def open(self):
+        logging.info("WebSocket opened")
+        self.write_message(json.dumps(chess.board["list"]))
+
+    def on_message(self, message):
+        print(message)
+        m = re.match(r"/move\?o=(\d\d)&n=(\d\d)", message)
+        old, new = m.group(1, 2)
         y_old = int(old[0])
         x_old = int(old[1])
         y_new = int(new[0])
         x_new = int(new[1])
         eaten = chess.move(x_old, y_old, x_new, y_new)
-        logging.info("{} {} {} {}".format(x_old, y_old, x_new, y_new))
         if eaten == None:
-            self.write("illegal")
+            self.write_message("illegal")
         else:
-            self.write(json.dumps(chess.board["list"]))
+            self.write_message(json.dumps(chess.board["list"]))
+
+    def on_close(self):
+        logging.info("WebSocket closed")
 
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static")
@@ -67,12 +74,12 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/current/sp-(\d\d)", CurPosHandler),
     (r"/restart", RestartHandler),
-    (r"/move", MoveHandler)
+    (r"/websocket", WebSocketHandler)
 ], debug=True, **settings)
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()
     signal.signal(signal.SIGINT, signal_handler)
-    application.listen(8888)
+    application.listen(5000)
     tornado.ioloop.PeriodicCallback(try_exit, 100).start() 
     tornado.ioloop.IOLoop.instance().start()
