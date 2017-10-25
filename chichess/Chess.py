@@ -95,26 +95,21 @@ class Chess(object):
         self.eaten_list = []
 
     def init_board(self):
-        print(self.__color("WTF: ", "RED"), "INITING...")
         self.board["list"] = copy.deepcopy(self.initial)
         self.board["grid"] = [['0'] * 9 for i in range(10)]
         for pid, pos in self.board["list"].items():
             self.board["grid"][pos[0]][pos[1]] = pid
 
     def restart(self):
-        # print(self.__color("WTF: ", "RED"), "RESTARTING...")
         self.board["list"] = copy.deepcopy(self.initial)
         self.board["grid"] = [['0'] * 9 for i in range(10)]
         for pid, pos in self.board["list"].items():
             self.board["grid"][pos[0]][pos[1]] = pid
         self.eaten_list = []
-        # print(self.__color("WTF: ", "RED"), "RESTART COMPLETE")
 
     def display(self):
         text = ["{:3}".format(str(10-idx)) + ''.join([self.hanzi[x[0]] if x != '0' else self.pattern[idx] for x in row])
                 + ' ' + str(10-idx) for idx, row in enumerate(self.board["grid"][::-1])]
-        # text[4] = '6  '+u'┴─'*9+' 6'
-        # text[5] = '5  '+u'┬─'*9+' 5'
         file_tag = "   a b c d e f g h i"
         text = [file_tag] + text + [file_tag]
         for row in text:

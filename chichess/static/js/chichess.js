@@ -42,7 +42,9 @@ var chichess = new Vue({
     COL: [0,1,2,3,4,5,6,7,8],
     pos: {},
     selectPiece: null,
-    selectStep: false
+    selectStep: false,
+    modal_title: "",
+    passcode: null
   },
   computed: {
     map: function () {
@@ -80,18 +82,52 @@ var chichess = new Vue({
         .catch(function (error) {
           console.log(error);
         })
+    },
+    onClickModal: function (e) {
+      console.log(e.type);
+      if (e.type == "show") {
+        var button = $(e.relatedTarget) // Button that triggered the modal
+        var player;
+        switch(button.data('player')) { // Extract info from data-* attributes
+          case "red":
+            player = "红";
+            break;
+          case "black":
+            player = "黑";
+            break;
+        }
+        this.modal_title = '执' + player;
+        // var modal = $(this)
+        // modal.find('.modal-title').text('执' + player)
+        // modal.find('.modal-body label').text(player).attr('readonly', null)
+      }
+    },
+    submitCode: function (e) {
+      console.log(this.passcode);
+      ws.send('/validation?code=' + this.passcode)
     }
   },
   created() {
     vm = this;
     ws.onmessage = function(response) {
-      if (response.data == "illegal") {
-        vm.status = "Illegal Move";
-      } else {
-        vm.pos = JSON.parse(response.data);
-        vm.status = "";
+      data = JSON.parse(response.data);
+      switch (data.type) {
+        case "move":
+          if (data.body == "illegal") {
+            vm.status = "Illegal Move";
+          } else {
+            vm.pos = data.body;
+            vm.status = "";
+          }
+          break;
+        case "validation":
+          vm.status = data.body;
       }
+      
       document.getElementById('sq-' + vm.selectPiece).classList.remove("selected-chi");
     };
+  },
+  mounted() {
+    $('#chooseModal').on('show.bs.modal', this.onClickModal)
   }
 })

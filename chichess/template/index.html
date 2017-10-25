@@ -3,16 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello Chess</title>
-    <script type="text/javascript" src="../static/js/vue.js"></script>
+    <script type="text/javascript" src="https://vuejs.org/js/vue.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/chichess.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-    <!-- <script type="text/javascript" src="../static/js/chessboard-0.3.0.js"></script> -->
-    <!-- <script
-    src="https://code.jquery.com/jquery-1.12.4.min.js"
-    integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-    crossorigin="anonymous"></script> -->
-    <!-- <link rel="stylesheet" href="../static/css/chessboard-0.3.0.css"> -->
 </head>
 <body>
     <h1 class="text-center">中国象棋</h1>
@@ -40,22 +34,61 @@
                     </div>
             </div>
             <div class="col">
-                <button 
-                type="button"
-                class="btn btn-outline-primary"
-                v-on:click="onClickRestart">重新开始</button>
+                <div class="row my-2">
+                    <div class="btn-group">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            @click="onClickRestart">重新开始</button>
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="btn-group-vertical">
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#chooseModal" data-player="red" v-on:click="onClickModal($event)">执红</button>
+                        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#chooseModal" data-player="black" v-on:click="onClickModal($event)">执黑</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="form-group">
-            &nbsp;
+        <!--<div class="form-group">-->
+            <!--&nbsp;-->
+        <!--</div>-->
+        <div v-text="status" class="alert alert-info my-4" role="alert"> </div>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="chooseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"
+                            v-text="modal_title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="submitCode">
+                          <div class="form-group">
+                            <label for="player" class="col-form-label">请输入口令</label>
+                            <input type="password" class="form-control" id="playerCode" placeholder="passcode" v-model="passcode">
+                            <small class="form-text text-muted">请联系管理员获得口令</small>
+                          </div>
+                          <button type="submit" class="btn btn-primary">提交</button>
+                        </form>
+                    </div>
+                    <!-- <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary">提交</button>
+                    </div> -->
+                </div>
+            </div>
         </div>
-        <div v-text="status" class="alert alert-info" role="alert"> </div>
     </div>
 
-    <!-- <div id="board" style="width: 400px"></div>
-    <script>
-        var board = ChessBoard('board', 'start');
-    </script> -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <script type="text/javascript" src="../static/js/chichess.js"></script>
 </body>
 </html>
